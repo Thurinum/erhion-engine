@@ -12,5 +12,6 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
     });
 
+
     return EXIT_SUCCESS;
 }
