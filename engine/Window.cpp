@@ -18,6 +18,12 @@ void Erhion::Engine::Window::InitWindow(const string& title, int width, int heig
         Log(CRITICAL, "window", "Failed to create GLFW window");
         glfwTerminate();
     }
+
+    glfwMakeContextCurrent(m_window);
+
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+        Log(CRITICAL, "window", "Failed to initialize GLAD");
+    }
 }
 
 void Erhion::Engine::Window::BeginRenderLoop(const std::function<void()>& renderCallback) {

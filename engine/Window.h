@@ -1,8 +1,10 @@
 #ifndef ERHION_ENGINE_WINDOW_H
 #define ERHION_ENGINE_WINDOW_H
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <functional>
+
 #include "logging.h"
 
 namespace Erhion::Engine {
