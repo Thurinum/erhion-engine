@@ -1,14 +1,18 @@
 #ifndef ERHION_ENGINE_WINDOW_H
 #define ERHION_ENGINE_WINDOW_H
 
+#include <GLFW/glfw3.h>
 #include "logging.h"
 
 namespace Erhion::Engine {
     class Window {
     public:
-        void Test() {
-            std::cout << "Hewwo window!" << std::endl;
+        Window() {
             Utils::Log();
+
+            if (!glfwInit()) {
+                return;
+            }
         }
     };
 }
