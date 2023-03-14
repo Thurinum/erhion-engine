@@ -5,7 +5,7 @@
 using namespace Erhion;
 
 int main() {
-    Engine::Window w;
+    Engine::Window w("Erhion Engine");
 
     return EXIT_SUCCESS;
 }
