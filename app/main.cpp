@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "window.h"
 
 using namespace Erhion;
