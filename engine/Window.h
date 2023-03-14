@@ -5,15 +5,11 @@
 #include "logging.h"
 
 namespace Erhion::Engine {
+    using namespace Erhion::Utils;
+
     class Window {
     public:
-        Window() {
-            Utils::Log();
-
-            if (!glfwInit()) {
-                return;
-            }
-        }
+        Window();
     };
 }
 
