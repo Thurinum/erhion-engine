@@ -1,5 +1,4 @@
-#ifndef ERHION_ENGINE_WINDOW_H
-#define ERHION_ENGINE_WINDOW_H
+#pragma once
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -8,12 +7,10 @@
 #include "logging.h"
 
 namespace Erhion::Engine {
-    using namespace Erhion::Utils;
-
     class Window {
     public:
-        explicit Window(const string& title);
-        Window(const string& title, int width, int height);
+        explicit Window(std::string_view title);
+        Window(std::string_view title, int width, int height);
 
         const int DEFAULT_WIDTH = 800;
         const int DEFAULT_HEIGHT = 600;
@@ -22,9 +19,6 @@ namespace Erhion::Engine {
     private:
         GLFWwindow* m_window;
 
-        void InitWindow(const string &title, int width, int height);
+        void InitWindow(const char* title, int width, int height);
     };
 }
-
-
-#endif //ERHION_ENGINE_WINDOW_H

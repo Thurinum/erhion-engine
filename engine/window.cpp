@@ -1,28 +1,31 @@
 #include "window.h"
 
-Erhion::Engine::Window::Window(const string& title) {
-    InitWindow(title, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+DECLARE_LOG_CATEGORY(LogWindow)
+
+Erhion::Engine::Window::Window(std::string_view title) {
+    InitWindow(title.data(), DEFAULT_WIDTH, DEFAULT_HEIGHT);
 }
 
-Erhion::Engine::Window::Window(const string &title, int width, int height) {
-    InitWindow(title, width, height);
+Erhion::Engine::Window::Window(std::string_view title, int width, int height) {
+    InitWindow(title.data(), width, height);
 }
 
-void Erhion::Engine::Window::InitWindow(const string& title, int width, int height) {
+void Erhion::Engine::Window::InitWindow(const char* title, int width, int height) {
     if (!glfwInit())
-        Log(CRITICAL, "window", "Failed to initialize GLFW");
+        LOG(Critical, LogWindow, "Failed to initialize GLFW");
 
-    m_window = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Erhion Engine", nullptr, nullptr);
+    m_window = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, title, nullptr, nullptr);
 
     if (!m_window) {
-        Log(CRITICAL, "window", "Failed to create GLFW window");
+        LOG(Critical, LogWindow, "Failed to create GLFW window {}");
         glfwTerminate();
     }
 
     glfwMakeContextCurrent(m_window);
 
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        Log(CRITICAL, "window", "Failed to initialize GLAD");
+        LOG(Critical, LogWindow, "Failed to initialize GLAD");
     }
 }
 
