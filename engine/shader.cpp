@@ -2,6 +2,7 @@
 #include "io.h"
 #include "logging.h"
 #include <cassert>
+#include <glm/gtc/type_ptr.hpp>
 
 DECLARE_LOG_CATEGORY(LogShader)
 
@@ -9,43 +10,66 @@ using namespace Erhion::Utils;
 
 Erhion::Engine::Shader::Shader(const std::string& FilePath, ShaderType Type) : type(Type)
 {
-	const FileReader::ReadStringResult& ReadResult = FileReader::ReadString(FilePath);
-	assert(ReadResult.has_value());
+	const FileReader::ReadStringResult& readResult = FileReader::ReadString(FilePath);
+	if (!readResult.has_value()) {
+		LOG(Error, LogShader, "Failed to read shader file");
+		return;
+	} // todo: use std::expected with a factory function
 
-	const GLchar* source = ReadResult.value().c_str();
+	const GLchar* source = readResult.value().c_str();
 
-	data = glCreateShader(Type);
-	glShaderSource(data, 1, &source, nullptr);
-	glCompileShader(data);
+	m_shader = glCreateShader(Type);
+	glShaderSource(m_shader, 1, &source, nullptr);
+	glCompileShader(m_shader);
 
 	GLint success;
-	glGetShaderiv(data, GL_COMPILE_STATUS, &success);
+	glGetShaderiv(m_shader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		char infoLog[512];
-		glGetShaderInfoLog(data, 512, nullptr, infoLog);
-		LOG(Error, LogShader, "Failed to compile shader", infoLog);
-		throw std::runtime_error("Shader compilation failed");
+		glGetShaderInfoLog(m_shader, 512, nullptr, infoLog);
+		LOG(Error, LogShader, "Failed to compile shader {}", infoLog);
 	}
 }
 
 Erhion::Engine::Shader::~Shader()
 {
-	glDeleteShader(data);
+	glDeleteShader(m_shader);
 }
 
 Erhion::Engine::ShaderProgram::ShaderProgram(const Shader & vertexShader, const Shader & fragmentShader)
 {
-	program = glCreateProgram();
+	if (vertexShader.type != ShaderType::Vertex || fragmentShader.type != ShaderType::Fragment) {
+		LOG(Error, LogShader, "Shader type mismatch");
+		return;
+	}
 
-	glAttachShader(program, vertexShader.data);
-	glAttachShader(program, fragmentShader.data);
-	glLinkProgram(program);
+	m_program = glCreateProgram();
+
+	glAttachShader(m_program, vertexShader.get());
+	glAttachShader(m_program, fragmentShader.get());
+	glLinkProgram(m_program);
 
 	GLint success;
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	glGetProgramiv(m_program, GL_LINK_STATUS, &success);
 	if (!success) {
 		GLchar infoLog[512];
-		glGetProgramInfoLog(program, 512, nullptr, infoLog);
-		//LogError("Shader program linking failed: %s", infoLog);
+		glGetProgramInfoLog(m_program, 512, nullptr, infoLog);
+		LOG(Error, LogShader, "Shader program linking failed: {}", infoLog);
 	}
+}
+
+Erhion::Engine::ShaderProgram::~ShaderProgram()
+{
+	glDeleteProgram(m_program);
+}
+
+void Erhion::Engine::ShaderProgram::setUniformVec3(const char* name, const glm::vec3& value) const
+{
+	GLint location = glGetUniformLocation(m_program, name);
+	if (location == -1) {
+		LOG(Error, LogShader, "Cannot find uniform {}", name);
+		return;
+	}
+
+	glUniform3fv(location, 1, glm::value_ptr(value));
 }

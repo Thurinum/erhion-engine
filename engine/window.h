@@ -11,6 +11,7 @@ namespace Erhion::Engine {
     public:
         explicit Window(std::string_view title);
         Window(std::string_view title, int width, int height);
+        ~Window();
 
         const int DEFAULT_WIDTH = 800;
         const int DEFAULT_HEIGHT = 600;
