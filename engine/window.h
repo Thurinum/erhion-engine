@@ -9,16 +9,12 @@
 namespace Erhion::Engine {
     class Window {
     public:
-        explicit Window(std::string_view title);
         Window(std::string_view title, int width, int height);
         ~Window();
 
-        const int DEFAULT_WIDTH = 800;
-        const int DEFAULT_HEIGHT = 600;
-
-        void BeginRenderLoop(const std::function<void()>& renderCallback);
+        void BeginRenderLoop(const std::function<void()>& renderCallback) const;
     private:
-        GLFWwindow* m_window;
+        GLFWwindow* m_window = nullptr;
 
         void InitWindow(const char* title, int width, int height);
     };

@@ -3,6 +3,8 @@ project(engine)
 add_library(${PROJECT_NAME} STATIC 
     "window.cpp" 
     "shader.cpp"
+        mesh.cpp
+        mesh.h
 )
 add_library(erhion::engine ALIAS ${PROJECT_NAME})
 
