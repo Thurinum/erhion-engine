@@ -4,8 +4,6 @@
 #include <cassert>
 #include <glm/gtc/type_ptr.hpp>
 
-DECLARE_LOG_CATEGORY(LogShader)
-
 using namespace Erhion::Utils;
 
 Erhion::Engine::Shader::Shader(const std::string& FilePath, ShaderType Type) : type(Type)
@@ -61,15 +59,4 @@ Erhion::Engine::ShaderProgram::ShaderProgram(const Shader & vertexShader, const 
 Erhion::Engine::ShaderProgram::~ShaderProgram()
 {
 	glDeleteProgram(m_program);
-}
-
-void Erhion::Engine::ShaderProgram::setUniformVec3(const char* name, const glm::vec3& value) const
-{
-	GLint location = glGetUniformLocation(m_program, name);
-	if (location == -1) {
-		LOG(Error, LogShader, "Cannot find uniform {}", name);
-		return;
-	}
-
-	glUniform3fv(location, 1, glm::value_ptr(value));
 }

@@ -38,7 +38,7 @@ int main() {
         constexpr float duration = 10.0f;
         const float R = std::fmod(time, duration) / duration;
 
-        shaderProgram.setUniformVec3("outColor", glm::vec3(R, 0.3f, 0.1f));
+        shaderProgram.setUniform("outColor", glm::vec3(R, 0.3f, 0.1f));
 
 		mesh.Bind();
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
