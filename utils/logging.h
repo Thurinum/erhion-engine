@@ -15,7 +15,7 @@ using std::string;
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 #define LOG(severity, category, format, ...) \
-    Erhion::Utils::Log(Erhion::Utils::Severity::severity, Erhion::LogCategories::category, format, __FILE__, TOSTRING(__LINE__), __VA_ARGS__)
+    Erhion::Utils::Log(Erhion::Utils::Severity::severity, Erhion::LogCategories::category, format, __FILE__, TOSTRING(__LINE__), ##__VA_ARGS__)
 
 namespace Erhion::Utils {
     enum Severity {

@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "window.h"
 #include "shader.h"
 
