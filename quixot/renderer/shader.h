@@ -21,6 +21,8 @@ namespace Erhion::Engine {
 
 		const ShaderType type;
 
+		bool isValid() const { return m_shader != 0; }
+
 		GLuint get() const { return m_shader; }
 	private:
 		GLuint m_shader = 0;

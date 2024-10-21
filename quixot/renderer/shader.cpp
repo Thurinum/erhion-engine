@@ -32,7 +32,8 @@ Erhion::Engine::Shader::Shader(const std::string& FilePath, ShaderType Type) : t
 
 Erhion::Engine::Shader::~Shader()
 {
-	glDeleteShader(m_shader);
+	if (isValid())
+		glDeleteShader(m_shader);
 }
 
 Erhion::Engine::ShaderProgram::ShaderProgram(const Shader & vertexShader, const Shader & fragmentShader)
