@@ -6,7 +6,7 @@
 
 #include "core/logging.h"
 
-namespace Erhion::Engine {
+namespace Quixot::Renderer {
     class Window {
     public:
         Window(std::string_view title, int width, int height);

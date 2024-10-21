@@ -8,16 +8,16 @@
 using std::string;
 
 #define DECLARE_LOG_CATEGORY(name) \
-	namespace Erhion::LogCategories { \
+	namespace Quixot::LogCategories { \
 		inline constexpr const char* const name = #name; \
 	}
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 #define LOG(severity, category, format, ...) \
-    Erhion::Utils::Log(Erhion::Utils::Severity::severity, Erhion::LogCategories::category, format, __FILE__, TOSTRING(__LINE__), ##__VA_ARGS__)
+    Quixot::Core::Log(Quixot::Core::Severity::severity, Quixot::LogCategories::category, format, __FILE__, TOSTRING(__LINE__), ##__VA_ARGS__)
 
-namespace Erhion::Utils {
+namespace Quixot::Core {
     enum Severity {
         Done,
         Info,

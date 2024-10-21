@@ -6,7 +6,7 @@
 #include <optional>
 #include <glm/vec2.hpp>
 
-namespace Erhion {
+namespace Quixot {
 	using string = std::string;
 	using string_view = std::string_view;
 

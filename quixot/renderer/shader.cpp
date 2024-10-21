@@ -5,9 +5,9 @@
 #include <cassert>
 #include <glm/gtc/type_ptr.hpp>
 
-using namespace Erhion::Utils;
+using namespace Quixot::Core;
 
-Erhion::Engine::Shader::Shader(const std::string& FilePath, ShaderType Type) : type(Type)
+Quixot::Renderer::Shader::Shader(const std::string& FilePath, ShaderType Type) : type(Type)
 {
 	const result<string, string>& readResult = FileReader::ReadString(FilePath);
 	if (!readResult.has_value()) {
@@ -30,13 +30,13 @@ Erhion::Engine::Shader::Shader(const std::string& FilePath, ShaderType Type) : t
 	}
 }
 
-Erhion::Engine::Shader::~Shader()
+Quixot::Renderer::Shader::~Shader()
 {
 	if (isValid())
 		glDeleteShader(m_shader);
 }
 
-Erhion::Engine::ShaderProgram::ShaderProgram(const Shader & vertexShader, const Shader & fragmentShader)
+Quixot::Renderer::ShaderProgram::ShaderProgram(const Shader & vertexShader, const Shader & fragmentShader)
 {
 	if (vertexShader.type != ShaderType::Vertex || fragmentShader.type != ShaderType::Fragment) {
 		LOG(Error, LogShader, "Shader type mismatch");
@@ -58,7 +58,7 @@ Erhion::Engine::ShaderProgram::ShaderProgram(const Shader & vertexShader, const 
 	}
 }
 
-Erhion::Engine::ShaderProgram::~ShaderProgram()
+Quixot::Renderer::ShaderProgram::~ShaderProgram()
 {
 	glDeleteProgram(m_program);
 }

@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-namespace Erhion::Utils {
+namespace Quixot::Core {
 	
 	result<string, string> FileReader::ReadString(const std::string& path)
 	{

@@ -2,16 +2,16 @@
 
 DECLARE_LOG_CATEGORY(LogWindow)
 
-Erhion::Engine::Window::Window(std::string_view title, int width, int height) {
+Quixot::Renderer::Window::Window(std::string_view title, int width, int height) {
     InitWindow(title.data(), width, height);
 }
 
-Erhion::Engine::Window::~Window() {
+Quixot::Renderer::Window::~Window() {
 	glfwDestroyWindow(m_window);
 	glfwTerminate();
 }
 
-void Erhion::Engine::Window::InitWindow(const char* title, int width, int height) {
+void Quixot::Renderer::Window::InitWindow(const char* title, int width, int height) {
     if (!glfwInit())
         LOG(Critical, LogWindow, "Failed to initialize GLFW");
 
@@ -29,7 +29,7 @@ void Erhion::Engine::Window::InitWindow(const char* title, int width, int height
     }
 }
 
-void Erhion::Engine::Window::BeginRenderLoop(const std::function<void()>& renderCallback) const {
+void Quixot::Renderer::Window::BeginRenderLoop(const std::function<void()>& renderCallback) const {
     glfwMakeContextCurrent(m_window);
 
     while (!glfwWindowShouldClose(m_window)) {

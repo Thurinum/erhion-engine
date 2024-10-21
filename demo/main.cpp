@@ -4,7 +4,7 @@
 #include "window.h"
 #include "shader.h"
 
-using namespace Erhion::Engine;
+using namespace Quixot::Renderer;
 
 DECLARE_LOG_CATEGORY(App)
 

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "renderer/shader.h"
 
-using namespace Erhion::Engine;
+using namespace Quixot::Renderer;
 
 TEST(FakeTest, DummyTest) {
 	Shader s("", Vertex);

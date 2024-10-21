@@ -9,7 +9,7 @@
 
 DECLARE_LOG_CATEGORY(LogShader)
 
-namespace Erhion::Engine {
+namespace Quixot::Renderer {
 	enum ShaderType {
 		Vertex = GL_VERTEX_SHADER,
 		Fragment = GL_FRAGMENT_SHADER,
