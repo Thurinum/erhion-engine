@@ -16,7 +16,7 @@
         },
         {
           "name": "GLFW_BUILD_EXAMPLES",
-          "value": "false",
+          "value": "False",
           "type": "BOOL"
         },
         {
@@ -31,13 +31,8 @@
         },
         {
           "name": "GLFW_LIBRARY_TYPE",
-          "value": "SHARED",
+          "value": "STATIC",
           "type": "STRING"
-        },
-        {
-          "name": "BUILD_SHARED_LIBS",
-          "value": "False",
-          "type": "BOOL"
         }
       ]
     }

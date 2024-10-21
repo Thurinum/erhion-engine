@@ -24,4 +24,6 @@ add_subdirectory(thirdparty/glm)
 
 add_subdirectory(quixot/core)
 add_subdirectory(quixot/renderer)
+add_subdirectory(tests)
 add_subdirectory(demo)
+
