@@ -1,4 +1,4 @@
-#include "logging.h"
+#include "core/logging.h"
 
 #include <iostream>
 #include <glad/glad.h>

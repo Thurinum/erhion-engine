@@ -1,7 +1,10 @@
 project(app)
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} quixot::renderer)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+	quixot::core
+    quixot::renderer
+)
 
 set(FILES_TO_MOVE
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/simple.vs"

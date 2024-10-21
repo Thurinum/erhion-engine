@@ -3,9 +3,9 @@ set(GLOBAL_HEADER_PATH "${CMAKE_SOURCE_DIR}/quixot/core/type_aliases.h")
 function (set_common_compile_options target)
     if (MSVC)
         target_compile_options(${target} PRIVATE
-            /W4
+            #/W4
             /WX   # warnings as errors
-            /permissive- # conformant mode
+            #/permissive- # conformant mode
             /FI${GLOBAL_HEADER_PATH}
 
             $<$<CONFIG:Debug>:
@@ -27,7 +27,7 @@ function (set_common_compile_options target)
                 -fsanitize=address 
                 -fsanitize=undefined 
                 -fno-exceptions
-                -pedantic
+                #-pedantic
             >
         )
     endif()

@@ -1,6 +1,7 @@
 #include "shader.h"
 #include "io.h"
 #include "logging.h"
+
 #include <cassert>
 #include <glm/gtc/type_ptr.hpp>
 
