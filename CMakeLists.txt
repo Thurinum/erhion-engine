@@ -15,6 +15,12 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+add_compile_definitions(
+    $<$<CONFIG:Debug>:WITH_DEBUG>
+    $<$<NOT:$<CONFIG:Release>>:WITH_DEBUG>
+    $<$<CONFIG:Release>:NDEBUG>
+)
+
 add_subdirectory(quixot)
 add_subdirectory(tests)
 add_subdirectory(demo)

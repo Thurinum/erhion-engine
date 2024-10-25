@@ -7,7 +7,7 @@ using namespace Quixot::Renderer;
 DECLARE_LOG_CATEGORY(App)
 
 int main() {
-    const Window w("My Super Window", 800, 600);
+    Window w("My Super Window", 800, 600, 0);
 
     constexpr float vertices[] = {
         -0.5f, -0.5f, 0.0f,
