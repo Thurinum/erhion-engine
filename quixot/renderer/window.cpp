@@ -10,7 +10,21 @@ DECLARE_LOG_CATEGORY(LogWindow)
 
 namespace Quixot::Renderer {
 	Quixot::Renderer::Window::Window(std::string_view title, int width, int height, int deviceId) {
-		InitWindow(title.data(), width, height, deviceId);
+		m_deviceIndex = deviceId;
+		m_width = width;
+		m_height = height;
+
+		if (!glfwInit())
+			LOG(Critical, LogWindow, "Failed to initialize GLFW");
+
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // no OpenGL context
+
+		m_window = glfwCreateWindow(width, height, title.data(), nullptr, nullptr);
+
+		if (!m_window) {
+			LOG(Critical, LogWindow, "Failed to create GLFW window {}");
+			glfwTerminate();
+		}
 	}
 
 	Quixot::Renderer::Window::~Window() {
@@ -23,47 +37,60 @@ namespace Quixot::Renderer {
 		glfwTerminate();
 	}
 
-	void Quixot::Renderer::Window::InitWindow(const char* title, int width, int height, int deviceIndex) {
-		m_deviceIndex = deviceIndex;
-
-		if (!glfwInit())
-			LOG(Critical, LogWindow, "Failed to initialize GLFW");
-
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // no OpenGL context
-
-		m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-
-		if (!m_window) {
-			LOG(Critical, LogWindow, "Failed to create GLFW window {}");
-			glfwTerminate();
-		}
+	void Quixot::Renderer::Window::SetupVulkan(int width, int height)
+	{
+		CreateAppInstance()
+			.and_then([this](auto&& instance) {
+				m_instance = std::move(instance);
+				return FindFirstCapableDevice();
+			})
+			.and_then([this](auto&& device) {
+				m_device = std::move(device);
+				return CreateSurface();
+			})
+			.and_then([=](auto&& surface) {
+				m_surface = std::move(surface);
+				return CreateSwapchain(width, height);
+			})
+			.and_then([=](auto&& swapchain) {
+				m_swapchain = std::move(swapchain);
+				return;
+			})
+			.or_else([](auto&& error) {
+				LOG(Critical, LogWindow, "Failed to setup Vulkan: {}", error);
+			});
 	}
 
-	void Quixot::Renderer::Window::SetupVulkan()
+	either<vk::UniqueSurfaceKHR, string_view> Window::CreateSurface()
 	{
-		CreateAppInstance();
-
-		// find a device to render with
-		auto maybeDevice = FindFirstCapableDevice();
-		if (!maybeDevice.has_value())
-		{
-			LOG(Critical, LogWindow, "Failed to configure capable device: {}", maybeDevice.error());
-			return;
-		}
-		m_device = std::move(maybeDevice.value());
-
-		// create a surface to render to
 		VkSurfaceKHR tmpSurface;
 		VkResult createSurfaceResult = glfwCreateWindowSurface(m_instance.get(), m_window, nullptr, &tmpSurface);
+
 		if (createSurfaceResult != VK_SUCCESS) {
-			LOG(Critical, LogWindow, "Failed to create window surface, because {}", magic_enum::enum_name(createSurfaceResult));
-			return;
+			return unexpected(string(magic_enum::enum_name(createSurfaceResult)));
 		}
-		m_surface = vk::UniqueSurfaceKHR(tmpSurface, m_instance.get());
+
+		return vk::UniqueSurfaceKHR(tmpSurface, m_instance.get());
 	}
 
-	void Window::CreateAppInstance()
+	either<vk::UniqueSwapchainKHR, string_view> Window::CreateSwapchain(int width, int height)
 	{
+		vk::SurfaceFormatKHR surfaceFormat = vk::SurfaceFormatKHR(vk::Format::eB8G8R8A8Unorm, vk::ColorSpaceKHR::eSrgbNonlinear);
+		vk::SwapchainCreateInfoKHR swapchainCreateInfo({}, *m_surface, 2, surfaceFormat.format, surfaceFormat.colorSpace,
+			vk::Extent2D(width, height), 1, vk::ImageUsageFlagBits::eColorAttachment);
+
+		auto [result, swapchain] = m_device->createSwapchainKHRUnique(swapchainCreateInfo);
+		if (result != vk::Result::eSuccess)
+			return unexpected(magic_enum::enum_name(result));
+		
+		return swapchain;
+	}
+
+	either<vk::UniqueInstance, string_view> Window::CreateAppInstance()
+	{
+		if (!glfwVulkanSupported())
+			return unexpected("Vulkan is not supported.");
+
 		vk::ApplicationInfo appInfo(
 			"Quixot",
 			EngineVersion,
@@ -77,14 +104,25 @@ namespace Quixot::Renderer {
 		const char** glfwExtensions;
 
 		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+		if (glfwExtensions == nullptr)
+			return unexpected("Failed to get required instance extensions. Vulkan is likely unsupported.");
+
 		createInfo.enabledExtensionCount = glfwExtensionCount;
 		createInfo.ppEnabledExtensionNames = glfwExtensions;
-		m_instance = vk::createInstanceUnique(createInfo);
+
+		auto [result, instance] = vk::createInstanceUnique(createInfo);
+		if (result != vk::Result::eSuccess)
+			return unexpected(magic_enum::enum_name(result));
+
+		return instance;
 	}
 
-	result<vk::UniqueDevice, string> Quixot::Renderer::Window::FindFirstCapableDevice()
+	either<vk::UniqueDevice, string_view> Quixot::Renderer::Window::FindFirstCapableDevice()
 	{
-		std::vector<vk::PhysicalDevice> physicalDevices = m_instance->enumeratePhysicalDevices();
+		auto [result, physicalDevices] = m_instance->enumeratePhysicalDevices();
+		if (result != vk::Result::eSuccess)
+			return unexpected(std::format("Could not enumerate physical devices: {}", magic_enum::enum_name(result)));
+
 		if (physicalDevices.empty()) {
 			return unexpected("No physical device was found.");
 		}
@@ -119,8 +157,12 @@ namespace Quixot::Renderer {
 		vk::DeviceQueueCreateInfo queueCreateInfo({}, 0, 1);
 		vk::DeviceCreateInfo deviceCreateInfo({}, 1, &queueCreateInfo);
 
+		auto [result, device] = physicalDevice.createDeviceUnique(deviceCreateInfo);
+		if (result != vk::Result::eSuccess)
+			return unexpected(std::format("Failed to create device: {}", magic_enum::enum_name(result)));
+
 		LOG(Info, LogWindow, "Using physical device '{}'.", deviceName);
-		return physicalDevice.createDeviceUnique(deviceCreateInfo);
+		return device;
 	}
 
 	void Quixot::Renderer::Window::CleanupVulkan()
@@ -130,7 +172,7 @@ namespace Quixot::Renderer {
 
 	void Quixot::Renderer::Window::BeginRenderLoop(const std::function<void()>& renderCallback) {
 		m_renderThread = std::thread([this, renderCallback]() {
-			SetupVulkan();
+			SetupVulkan(m_width, m_height);
 
 			while (!m_isRendering && !glfwWindowShouldClose(m_window)) {
 				renderCallback();

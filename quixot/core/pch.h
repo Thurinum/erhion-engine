@@ -15,7 +15,7 @@ namespace Quixot {
 	using maybe = std::optional<T>;
 
 	template<typename T, typename E>
-	using result = std::expected<T, E>;
+	using either = std::expected<T, E>;
 	using std::unexpected;
 
 	using std::shared_ptr;

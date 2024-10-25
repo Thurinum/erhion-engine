@@ -3,6 +3,6 @@
 namespace Quixot::Core {
 	class FileReader {
 	public:
-		static result<string, string> ReadString(const std::string& path);
+		static either<string, string> ReadString(const std::string& path);
 	};
 }

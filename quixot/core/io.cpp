@@ -6,7 +6,7 @@
 
 namespace Quixot::Core {
 	
-	result<string, string> FileReader::ReadString(const std::string& path)
+	either<string, string> FileReader::ReadString(const std::string& path)
 	{
 		std::ifstream file(path, std::ios::in | std::ios::binary);
 		if (!file) {

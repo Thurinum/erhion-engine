@@ -3,6 +3,7 @@
 #include <functional>
 #include <thread>
 
+#define VULKAN_HPP_NO_EXCEPTIONS
 #include <vulkan/vulkan.hpp>
 
 class GLFWwindow;
@@ -27,12 +28,16 @@ namespace Quixot::Renderer {
         vk::UniqueInstance m_instance;
 		vk::UniqueDevice m_device;
 		vk::UniqueSurfaceKHR m_surface;
+		vk::UniqueSwapchainKHR m_swapchain;
 		int m_deviceIndex = -1;
+		int m_width = 0;
+		int m_height = 0;
 
-        void InitWindow(const char* title, int width, int height, int deviceIndex);
-		void SetupVulkan();
-        void CreateAppInstance();
-        result<vk::UniqueDevice, string> FindFirstCapableDevice();
+		void SetupVulkan(int width, int height);
+        either<vk::UniqueInstance, string_view> CreateAppInstance();
+        either<vk::UniqueDevice, string_view> FindFirstCapableDevice();
+        either<vk::UniqueSurfaceKHR, string_view> CreateSurface();
+        either<vk::UniqueSwapchainKHR, string_view> CreateSwapchain(int width, int height);
 		void CleanupVulkan();
     };
 }
