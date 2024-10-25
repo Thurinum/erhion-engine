@@ -3,19 +3,35 @@ project(renderer)
 add_library(${PROJECT_NAME} STATIC 
     window.cpp
     window.h
-    shader.cpp
-    shader.h
-    mesh.cpp
-    mesh.h
+#    shader.cpp
+ #   shader.h
+  #  mesh.cpp
+   # mesh.h
 )
 add_library(quixot::renderer ALIAS ${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
+include(FetchContent)
+FetchContent_Declare(
+  glfw
+  GIT_REPOSITORY https://github.com/glfw/glfw.git
+  GIT_TAG 3.4
+)
+FetchContent_MakeAvailable(glfw)
+
+find_package(Vulkan REQUIRED)
+
+target_precompile_headers(${PROJECT_NAME} PRIVATE 
+    pch.h
+)
+target_include_directories(${PROJECT_NAME} PUBLIC
+    ${CMAKE_SOURCE_DIR}
+    ${Vulkan_INCLUDE_DIRS}    
+)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     quixot::core
+    Vulkan::Vulkan
     glfw
-    glad
-    glm
 )
 
+include(${CMAKE_SOURCE_DIR}/cmake/CompileOptions.cmake)
 SET_COMMON_COMPILE_OPTIONS(${PROJECT_NAME})

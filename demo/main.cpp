@@ -1,8 +1,6 @@
 #include <cmath>
 
-#include "mesh.h"
-#include "window.h"
-#include "shader.h"
+#include <quixot/renderer/window.h>
 
 using namespace Quixot::Renderer;
 
@@ -23,25 +21,25 @@ int main() {
         2, 3, 0
     };
 
-    const Mesh mesh(vertices, sizeof(vertices), indices, sizeof(indices));
+   /* const Mesh mesh(vertices, sizeof(vertices), indices, sizeof(indices));
 
     const Shader vertexShader("simple.vs", ShaderType::Vertex);
 	const Shader fragmentShader("simple.fs", ShaderType::Fragment);
 	const ShaderProgram shaderProgram(vertexShader, fragmentShader);
-    shaderProgram.use();
+    shaderProgram.use();*/
 
     w.BeginRenderLoop([&]() {
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+       /* glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);*/
 
-        const auto time = static_cast<float>(glfwGetTime());
-        constexpr float duration = 10.0f;
-        const float R = std::fmod(time, duration) / duration;
+        //const auto time = static_cast<float>(glfwGetTime());
+        //constexpr float duration = 10.0f;
+        //const float R = std::fmod(time, duration) / duration;
 
-        shaderProgram.setUniform("outColor", glm::vec3(R, 0.3f, 0.1f));
+        /*shaderProgram.setUniform("outColor", glm::vec3(R, 0.3f, 0.1f));
 
 		mesh.Bind();
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);*/
     });
 
     return EXIT_SUCCESS;

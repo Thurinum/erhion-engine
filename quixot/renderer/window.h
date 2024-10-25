@@ -1,10 +1,9 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <functional>
+#include <vulkan/vulkan.hpp>
 
-#include "core/logging.h"
+class GLFWwindow;
 
 namespace Quixot::Renderer {
     class Window {
@@ -15,6 +14,8 @@ namespace Quixot::Renderer {
         void BeginRenderLoop(const std::function<void()>& renderCallback) const;
     private:
         GLFWwindow* m_window = nullptr;
+
+        vk::UniqueDevice* m_device;
 
         void InitWindow(const char* title, int width, int height);
     };
