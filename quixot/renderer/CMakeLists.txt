@@ -31,6 +31,11 @@ find_package(Vulkan REQUIRED)
 target_precompile_headers(${PROJECT_NAME} PRIVATE 
     pch.h
 )
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    GLFW_INCLUDE_VULKAN
+    VULKAN_HPP_NO_EXCEPTIONS
+    VULKAN_HPP_ASSERT=0
+)
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_SOURCE_DIR}
     ${Vulkan_INCLUDE_DIRS}    

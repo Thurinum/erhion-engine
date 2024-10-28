@@ -1,6 +1,5 @@
 #include "window.h"
 
-#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <mutex>
@@ -42,7 +41,7 @@ namespace Quixot::Renderer {
 		CreateAppInstance()
 			.and_then([this](auto&& instance) {
 				m_instance = std::move(instance);
-				return FindFirstCapableDevice();
+				return FindCapableDevice();
 			})
 			.and_then([this](auto&& device) {
 				m_device = std::move(device);
@@ -54,10 +53,11 @@ namespace Quixot::Renderer {
 			})
 			.and_then([=](auto&& swapchain) {
 				m_swapchain = std::move(swapchain);
-				return;
+				return either<int, string_view> {};
 			})
 			.or_else([](auto&& error) {
 				LOG(Critical, LogWindow, "Failed to setup Vulkan: {}", error);
+				return either<int, string_view> {};
 			});
 	}
 
@@ -83,13 +83,17 @@ namespace Quixot::Renderer {
 		if (result != vk::Result::eSuccess)
 			return unexpected(magic_enum::enum_name(result));
 		
-		return swapchain;
+		return std::move(swapchain);
 	}
 
 	either<vk::UniqueInstance, string_view> Window::CreateAppInstance()
 	{
 		if (!glfwVulkanSupported())
 			return unexpected("Vulkan is not supported.");
+
+		const std::vector<const char*> validationLayers = {
+			"VK_LAYER_KHRONOS_validation"
+		};
 
 		vk::ApplicationInfo appInfo(
 			"Quixot",
@@ -99,6 +103,9 @@ namespace Quixot::Renderer {
 			VK_API_VERSION_1_3
 		);
 		vk::InstanceCreateInfo createInfo({}, &appInfo);
+
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
 
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions;
@@ -114,14 +121,14 @@ namespace Quixot::Renderer {
 		if (result != vk::Result::eSuccess)
 			return unexpected(magic_enum::enum_name(result));
 
-		return instance;
+		return std::move(instance);
 	}
 
-	either<vk::UniqueDevice, string_view> Quixot::Renderer::Window::FindFirstCapableDevice()
+	either<vk::UniqueDevice, string_view> Quixot::Renderer::Window::FindCapableDevice()
 	{
-		auto [result, physicalDevices] = m_instance->enumeratePhysicalDevices();
-		if (result != vk::Result::eSuccess)
-			return unexpected(std::format("Could not enumerate physical devices: {}", magic_enum::enum_name(result)));
+		auto [getDeviceResult, physicalDevices] = m_instance->enumeratePhysicalDevices();
+		if (getDeviceResult != vk::Result::eSuccess)
+			return unexpected(std::format("Could not enumerate physical devices: {}", magic_enum::enum_name(getDeviceResult)));
 
 		if (physicalDevices.empty()) {
 			return unexpected("No physical device was found.");
@@ -154,15 +161,21 @@ namespace Quixot::Renderer {
 			return unexpected(std::format("Physical device '{}' does not support graphics.", "deviceName.c_str()"));
 		}
 
-		vk::DeviceQueueCreateInfo queueCreateInfo({}, 0, 1);
+		std::vector<float> queuePriorities(1, 1.0f);
+		vk::DeviceQueueCreateInfo queueCreateInfo({}, queueFamilyIndex, queuePriorities.size(), queuePriorities.data());
 		vk::DeviceCreateInfo deviceCreateInfo({}, 1, &queueCreateInfo);
+		std::vector<const char*> requiredExtensions = {
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		};
+		deviceCreateInfo.enabledExtensionCount = requiredExtensions.size();
+		deviceCreateInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
-		auto [result, device] = physicalDevice.createDeviceUnique(deviceCreateInfo);
-		if (result != vk::Result::eSuccess)
-			return unexpected(std::format("Failed to create device: {}", magic_enum::enum_name(result)));
+		auto [createDeviceResult, device] = physicalDevice.createDeviceUnique(deviceCreateInfo);
+		if (createDeviceResult != vk::Result::eSuccess)
+			return unexpected(std::format("Failed to create device: {}", magic_enum::enum_name(createDeviceResult)));
 
 		LOG(Info, LogWindow, "Using physical device '{}'.", deviceName);
-		return device;
+		return std::move(device);
 	}
 
 	void Quixot::Renderer::Window::CleanupVulkan()
@@ -171,17 +184,19 @@ namespace Quixot::Renderer {
 	}
 
 	void Quixot::Renderer::Window::BeginRenderLoop(const std::function<void()>& renderCallback) {
-		m_renderThread = std::thread([this, renderCallback]() {
-			SetupVulkan(m_width, m_height);
+		/*m_renderThread = std::thread([this, renderCallback]() {
+			
+		});*/
 
-			while (!m_isRendering && !glfwWindowShouldClose(m_window)) {
-				renderCallback();
-				glfwSwapBuffers(m_window);
-				glfwPollEvents();
-			}
+		SetupVulkan(m_width, m_height);
 
-			CleanupVulkan();
-		});
+		while (!m_isRendering && !glfwWindowShouldClose(m_window)) {
+			renderCallback();
+			glfwSwapBuffers(m_window);
+			glfwPollEvents();
+		}
+
+		CleanupVulkan();
 	}
 
 	void Quixot::Renderer::Window::StopRenderLoop()
